@@ -1,13 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import BoardComponent from './components/board.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, BoardComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  title = 'angular-lights-out-game';
+  title = signal('Lights Out Game');
+
+  constructor() { }
+
+  rows = signal([
+    [false, false, false],
+    [false, false, false],
+    [false, false, false]
+  ]);
 }

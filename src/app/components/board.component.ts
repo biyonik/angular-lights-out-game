@@ -7,15 +7,19 @@ import { NgFor } from "@angular/common";
   selector: 'board',
   imports: [CellComponent, NgFor],
   template: `
+    @if(this.hasWon()) {
+      <h1>Congratulations! You've won!</h1>
+    }
     <table class="Board">
       <tbody>
         @for(row of board(); track row; let i = $index) {
           <tr>
-            @for(cell of row; track cell; let j = $index) {
+            @for(cell of row; track j; let j = $index) {
               @let coord = i + '-' + j;
               <cell
                 [isLit]="cell"
-                [key]="coord"
+                [coordinates]="coord"
+                (clickedCell)="handleClickedCell($event)"
               />
             }
           </tr>
@@ -29,11 +33,13 @@ export default class BoardComponent implements OnInit {
   nRows: InputSignal<number> = input<number>(5);
   chanceLightStartsOn: InputSignal<number> = input<number>(0.25);
 
+  clickedCellSignal = signal<string | undefined>(undefined);
   boardSignal: WritableSignal<boolean[][]> = signal([])
   hasWonSignal: WritableSignal<boolean> = signal(false);
 
   board = this.boardSignal.asReadonly();
   hasWon = this.hasWonSignal.asReadonly();
+  clickedCell = this.clickedCellSignal.asReadonly();
 
 
   constructor() {
@@ -50,12 +56,17 @@ export default class BoardComponent implements OnInit {
 
   }
 
-  flipCellsAround(coordinates: string) {
-
-    let [y, x] = coordinates.split('-').map(Number);
-
+  handleClickedCell(event: string) {
+    this.clickedCellSignal.set(event);
+    let [y, x] = this.clickedCell()!.split('-').map(Number);
     this.flipCell(y, x);
+    this.flipCell(y, x - 1);
+    this.flipCell(y, x + 1);
+    this.flipCell(y - 1, x);
+    this.flipCell(y + 1, x);
 
+    const allCellsLit = this.board().every(row => row.every(cell => cell));
+    this.hasWonSignal.set(allCellsLit);
   }
 
   private flipCell(y: number, x: number) {

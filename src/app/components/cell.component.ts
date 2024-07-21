@@ -1,4 +1,4 @@
-import { Component, computed, input, InputSignal, OnInit } from "@angular/core";
+import { Component, computed, input, InputSignal, OnInit, output } from "@angular/core";
 
 @Component({
   standalone: true,
@@ -12,9 +12,9 @@ import { Component, computed, input, InputSignal, OnInit } from "@angular/core";
 })
 export default class CellComponent implements OnInit {
   isLit: InputSignal<boolean> = input<boolean>(false);
-  key: InputSignal<string | undefined> = input<string | undefined>();
+  coordinates: InputSignal<string | undefined> = input<string | undefined>();
+  clickedCell = output<string>();
 
-  
 
   constructor() { }
 
@@ -25,5 +25,7 @@ export default class CellComponent implements OnInit {
     return 'Cell ' + cls;
   })
 
-  handleClick() { }
+  handleClick() {
+    this.clickedCell.emit(this.coordinates()!);
+  }
 }

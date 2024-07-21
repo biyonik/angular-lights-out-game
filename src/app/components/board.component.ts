@@ -1,4 +1,4 @@
-import { Component, input, InputSignal, OnInit, signal, WritableSignal } from "@angular/core";
+import { Component, effect, input, InputSignal, OnInit, signal, WritableSignal } from "@angular/core";
 import CellComponent from "./cell.component";
 import { NgFor } from "@angular/common";
 
@@ -9,29 +9,25 @@ import { NgFor } from "@angular/common";
   template: `
     <table class="Board">
       <tbody>
+        @for(row of board(); track row; let i = $index) {
+          <tr>
+            @for(cell of row; track cell; let j = $index) {
+              @let coord = i + '-' + j;
+              <cell
+                [isLit]="cell"
+                [key]="coord"
+              />
+            }
+          </tr>
+        }
       </tbody>
     </table>
-  `,
-  styles: [`
-    .Board {
-      border-collapse: collapse;
-      width: 300px;
-      border: 1px solid black;
-      text-align: center;
-      margin: 0 auto;
-      padding: 0;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      font-family: Arial, sans-serif;
-      font-size: 18px;
-      user-select: none;
-      cursor: pointer;
-    }
-  `]
+  `
 })
 export default class BoardComponent implements OnInit {
-  nCols: InputSignal<number> = input.required<number>();
-  nRows: InputSignal<number> = input.required<number>();
+  nCols: InputSignal<number> = input<number>(5);
+  nRows: InputSignal<number> = input<number>(5);
+  chanceLightStartsOn: InputSignal<number> = input<number>(0.25);
 
   boardSignal: WritableSignal<boolean[][]> = signal([])
   hasWonSignal: WritableSignal<boolean> = signal(false);
@@ -40,9 +36,19 @@ export default class BoardComponent implements OnInit {
   hasWon = this.hasWonSignal.asReadonly();
 
 
-  constructor() { }
+  constructor() {
+    effect(() => {
+      const board = Array.from({ length: this.nRows() }, () => Array.from({ length: this.nCols() }, () => Math.random() < this.chanceLightStartsOn()));
+      this.boardSignal.set(board);
+      this.hasWonSignal.set(false);
+    }, {
+      allowSignalWrites: true
+    })
+  }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+
+  }
 
   flipCellsAround(coordinates: string) {
 

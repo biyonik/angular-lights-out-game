@@ -13,10 +13,4 @@ export class AppComponent {
   title = signal('Lights Out Game');
 
   constructor() { }
-
-  rows = signal([
-    [false, false, false],
-    [false, false, false],
-    [false, false, false]
-  ]);
 }
